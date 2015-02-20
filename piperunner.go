@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Result contains the pandoc output
+// Result contains the pandoc output or an error
 type Result struct {
 	text []byte // result is the pandoc output, could be anything
 	err  error
@@ -20,6 +20,7 @@ type job struct {
 	resultC chan Result // channel on which to receive the result
 }
 
+// Config allows for a different configuration
 type Config struct {
 	NrWorkers           int           // max number of parallel jobs
 	WaitForWorkerMs     time.Duration // mx ms to wait for free worker
@@ -36,6 +37,7 @@ var (
 	}
 )
 
+// startPool defines the function that will start the pool
 var startPool = func() {
 	jobs = make(chan job, 0)
 
@@ -51,7 +53,7 @@ var startPool = func() {
 	}
 }
 
-// startPool() starts the pool of workers
+// startPool() starts the pool of workers, once
 func StartPool() {
 	once.Do(startPool)
 }
@@ -75,13 +77,13 @@ func Exec(cmd string, input []byte) <-chan Result {
 	return j.resultC
 }
 
+// startCmd starts the command and checks for time out
 func startCmd(cmd string, in []byte) Result {
 	// we have a time out and a job to do.
 	complete := make(chan struct{})
 	result := Result{text: make([]byte, 0), err: errors.New("wait for completion timed out")}
 
 	go func() {
-		// can we rewrite result here?
 		result = execute(cmd, in)
 
 		close(complete)
@@ -95,6 +97,7 @@ func startCmd(cmd string, in []byte) Result {
 	}
 }
 
+// execute runs bash, feeds on stdin and reads from stdout
 func execute(cmd string, in []byte) Result {
 	command := exec.Command("bash", "-c", cmd)
 
