@@ -1,4 +1,4 @@
-Pipe Runner
+Pipe Runner [![Build Status](https://travis-ci.org/ffel/piperunner.svg)](https://travis-ci.org/ffel/piperunner)
 ===========
 
 Run a pool of workers that run external commands.
