@@ -82,6 +82,7 @@ func startCmd(cmd string, in []byte) Result {
 
 	go func() {
 		// can we rewrite result here?
+		result = execute(cmd, in)
 
 		close(complete)
 	}()
