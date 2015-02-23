@@ -18,10 +18,10 @@ func Example_single() {
 
 	result := <-resultc
 
-	if result.err != nil {
-		fmt.Printf("error: %v\n", result.err)
+	if result.Err != nil {
+		fmt.Printf("error: %v\n", result.Err)
 	} else {
-		fmt.Printf("%v\n", string(result.text))
+		fmt.Printf("%v\n", string(result.Text))
 	}
 
 	// output:
@@ -56,10 +56,10 @@ func Example_several() {
 	wg.Wait()
 
 	for i := 0; i < n; i++ {
-		if rr[i].err != nil {
-			fmt.Printf("error: %v\n", rr[i].err)
+		if rr[i].Err != nil {
+			fmt.Printf("error: %v\n", rr[i].Err)
 		} else {
-			fmt.Printf("%v", string(rr[i].text))
+			fmt.Printf("%v", string(rr[i].Text))
 		}
 	}
 

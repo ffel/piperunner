@@ -10,8 +10,8 @@ import (
 
 // Result contains the pandoc output or an error
 type Result struct {
-	text []byte // result is the pandoc output, could be anything
-	err  error
+	Text []byte // result is the pandoc output, could be anything
+	Err  error
 }
 
 type job struct {
@@ -70,7 +70,7 @@ func Exec(cmd string, input []byte) <-chan Result {
 			// it will time out
 
 		case <-time.After(config.WaitForWorkerMs * time.Millisecond):
-			j.resultC <- Result{text: make([]byte, 0), err: errors.New("wait for worker timed out")}
+			j.resultC <- Result{Text: make([]byte, 0), Err: errors.New("wait for worker timed out")}
 		}
 	}()
 
@@ -81,7 +81,7 @@ func Exec(cmd string, input []byte) <-chan Result {
 func startCmd(cmd string, in []byte) Result {
 	// we have a time out and a job to do.
 	complete := make(chan struct{})
-	result := Result{text: make([]byte, 0), err: errors.New("wait for completion timed out")}
+	result := Result{Text: make([]byte, 0), Err: errors.New("wait for completion timed out")}
 
 	go func() {
 		result = execute(cmd, in)
@@ -104,17 +104,17 @@ func execute(cmd string, in []byte) Result {
 	stdin, err := command.StdinPipe()
 
 	if err != nil {
-		return Result{text: make([]byte, 0), err: err}
+		return Result{Text: make([]byte, 0), Err: err}
 	}
 
 	stdout, err := command.StdoutPipe()
 
 	if err != nil {
-		return Result{text: make([]byte, 0), err: err}
+		return Result{Text: make([]byte, 0), Err: err}
 	}
 
 	if err := command.Start(); err != nil {
-		return Result{text: make([]byte, 0), err: err}
+		return Result{Text: make([]byte, 0), Err: err}
 	}
 
 	// write in to stdin
@@ -125,8 +125,8 @@ func execute(cmd string, in []byte) Result {
 	result, err := ioutil.ReadAll(stdout)
 
 	if err != nil {
-		return Result{text: make([]byte, 0), err: err}
+		return Result{Text: make([]byte, 0), Err: err}
 	}
 
-	return Result{text: result, err: nil}
+	return Result{Text: result, Err: nil}
 }
