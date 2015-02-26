@@ -113,6 +113,14 @@ func execute(cmd string, in []byte) Result {
 		return Result{Text: make([]byte, 0), Err: err}
 	}
 
+	stderr, err := command.StderrPipe()
+
+	if err != nil {
+		return Result{Text: make([]byte, 0), Err: err}
+	}
+
+	// run the command
+
 	if err := command.Start(); err != nil {
 		return Result{Text: make([]byte, 0), Err: err}
 	}
@@ -123,6 +131,17 @@ func execute(cmd string, in []byte) Result {
 
 	// read stdout as a result
 	result, err := ioutil.ReadAll(stdout)
+
+	if err != nil {
+		return Result{Text: make([]byte, 0), Err: err}
+	}
+
+	// read stderr for possible errors
+	msgs, err := ioutil.ReadAll(stderr)
+
+	if len(msgs) > 0 {
+		return Result{Text: msgs, Err: errors.New("stderr")}
+	}
 
 	if err != nil {
 		return Result{Text: make([]byte, 0), Err: err}
