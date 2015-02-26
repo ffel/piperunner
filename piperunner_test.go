@@ -115,3 +115,21 @@ func Example_several() {
 	// Lorum ipsum 48
 	// Lorum ipsum 49
 }
+
+func Example_stderr() {
+	StartPool()
+
+	// pandoc will write to stderr about unknown writer noSuchWriter
+	resultc := Exec("pandoc -f markdown -t noSuchWriter", []byte(doc))
+
+	result := <-resultc
+
+	if result.Err != nil {
+		fmt.Printf("error: %q - %q\n", result.Text, result.Err)
+	} else {
+		fmt.Printf("%v\n", string(result.Text))
+	}
+
+	// output:
+	// error: "pandoc: Unknown writer: nosuchwriter\n" - "stderr"
+}
