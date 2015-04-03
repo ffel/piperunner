@@ -125,12 +125,18 @@ func execute(cmd string, in []byte) Result {
 		return Result{Text: make([]byte, 0), Err: err}
 	}
 
+	defer func() {
+		// releases the resources
+		command.Wait()
+	}()
+
 	// write in to stdin
 	stdin.Write(in)
 	stdin.Close()
 
 	// read stdout as a result
 	result, err := ioutil.ReadAll(stdout)
+	stdout.Close()
 
 	if err != nil {
 		return Result{Text: make([]byte, 0), Err: err}
@@ -138,6 +144,7 @@ func execute(cmd string, in []byte) Result {
 
 	// read stderr for possible errors
 	msgs, err := ioutil.ReadAll(stderr)
+	stderr.Close()
 
 	if len(msgs) > 0 {
 		return Result{Text: msgs, Err: errors.New("stderr")}

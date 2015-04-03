@@ -63,6 +63,10 @@ func Example_several() {
 		}
 	}
 
+	// this gives some time to run `ps` and to see the large number
+	// of pandoc sub processes ...
+	// <-time.After(3 * time.Second)
+
 	// output:
 	// Lorum ipsum 0
 	// Lorum ipsum 1
@@ -116,6 +120,13 @@ func Example_several() {
 	// Lorum ipsum 49
 }
 
+/*
+Maybe it is a tat better when error messages are written to its
+dedicated property in Result to allow for a possible usefull Text.
+
+This is, however, of no help for pandoc as it does produce
+either output on stdout or error messages on stderr...
+*/
 func Example_stderr() {
 	StartPool()
 
