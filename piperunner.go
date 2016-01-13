@@ -20,37 +20,28 @@ type job struct {
 	resultC chan Result // channel on which to receive the result
 }
 
-// Config allows for a different configuration
-type Config struct {
+// configuration allows for a different configuration
+type configuration struct {
 	NrWorkers           int           // max number of parallel jobs
 	WaitForWorkerMs     time.Duration // mx ms to wait for free worker
 	WaitForCompletionMs time.Duration // max ms to wait for completion
 }
 
 var (
-	jobs   chan job            // queue with jobs waiting
-	once   sync.Once           // assure only one pool is started
-	config Config    = Config{ // default configuration
+	jobs   chan job                       // queue with jobs waiting
+	once   sync.Once                      // assure only one pool is started
+	config configuration = configuration{ // default configuration
 		NrWorkers:           3,
 		WaitForWorkerMs:     500,
 		WaitForCompletionMs: 500,
 	}
 )
 
-// startPool defines the function that will start the pool
-var startPool = func() {
-	jobs = make(chan job, 0)
-
-	for i := 0; i < config.NrWorkers; i++ {
-		go func() {
-			for {
-				select {
-				case j := <-jobs:
-					j.resultC <- startCmd(j.cmd, j.input)
-				}
-			}
-		}()
-	}
+// Config is used to set number of workers, timeout to wait for free
+// worker and timeout to wait for worker completion.
+// Run Config before StartPool
+func Config(nrWorkers int, waitForWorker, waitForCompletion time.Duration) {
+	config = configuration{nrWorkers, waitForWorker, waitForCompletion}
 }
 
 // startPool() starts the pool of workers, once
@@ -75,6 +66,22 @@ func Exec(cmd string, input []byte) <-chan Result {
 	}()
 
 	return j.resultC
+}
+
+// startPool defines the function that will start the pool
+var startPool = func() {
+	jobs = make(chan job, 0)
+
+	for i := 0; i < config.NrWorkers; i++ {
+		go func() {
+			for {
+				select {
+				case j := <-jobs:
+					j.resultC <- startCmd(j.cmd, j.input)
+				}
+			}
+		}()
+	}
 }
 
 // startCmd starts the command and checks for time out
